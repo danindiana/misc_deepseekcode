@@ -9,9 +9,8 @@
 #include <vector>
 #include <memory>
 
-// Include the implementation
-// In a real project, this would be a proper header include
-#include "../../examples/cpp/language_model.cpp"
+// Include the header
+#include "../../src/cpp/language_model.h"
 
 void test_statistical_model_creation() {
     std::cout << "Testing StatisticalLanguageModel creation..." << std::endl;

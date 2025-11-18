@@ -9,33 +9,47 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 # Compiler flags
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -O3")
 
-# Find required packages
-find_package(Eigen3 3.4 REQUIRED NO_MODULE)
+# Find optional packages
+find_package(Eigen3 3.4 QUIET NO_MODULE)
 find_package(OpenMP)
 
 # Include directories
 include_directories(
     ${PROJECT_SOURCE_DIR}/src/cpp
-    ${EIGEN3_INCLUDE_DIR}
 )
 
-# Source files
-set(SOURCES
-    examples/cpp/language_model.cpp
-)
-
-# Create executable
-add_executable(language_model ${SOURCES})
-
-# Link libraries
-target_link_libraries(language_model
-    Eigen3::Eigen
-)
-
-# If OpenMP is found, link it
-if(OpenMP_CXX_FOUND)
-    target_link_libraries(language_model OpenMP::OpenMP_CXX)
+if(Eigen3_FOUND)
+    include_directories(${EIGEN3_INCLUDE_DIR})
+    message(STATUS "Eigen3 found: ${EIGEN3_INCLUDE_DIR}")
+    add_definitions(-DHAVE_EIGEN3)
+else()
+    message(WARNING "Eigen3 not found. Some features will be disabled.")
+    message(STATUS "To install Eigen3: sudo apt-get install libeigen3-dev")
 endif()
+
+# Library sources
+set(LIB_SOURCES
+    src/cpp/language_model.cpp
+)
+
+# Create static library
+add_library(language_model_lib STATIC ${LIB_SOURCES})
+target_include_directories(language_model_lib PUBLIC
+    ${PROJECT_SOURCE_DIR}/src/cpp
+)
+
+# Link libraries to lib
+if(Eigen3_FOUND)
+    target_link_libraries(language_model_lib PUBLIC Eigen3::Eigen)
+endif()
+
+if(OpenMP_CXX_FOUND)
+    target_link_libraries(language_model_lib PUBLIC OpenMP::OpenMP_CXX)
+endif()
+
+# Example executable
+add_executable(language_model examples/cpp/main.cpp)
+target_link_libraries(language_model language_model_lib)
 
 # Installation
 install(TARGETS language_model DESTINATION bin)

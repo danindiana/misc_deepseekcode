@@ -5,10 +5,8 @@ add_executable(test_language_model
     cpp/test_language_model.cpp
 )
 
-# Link test executable
-target_link_libraries(test_language_model
-    Eigen3::Eigen
-)
+# Link test executable with the library (this brings in Eigen3 if available)
+target_link_libraries(test_language_model language_model_lib)
 
 # Add test to CTest
 add_test(NAME LanguageModelTest COMMAND test_language_model)
